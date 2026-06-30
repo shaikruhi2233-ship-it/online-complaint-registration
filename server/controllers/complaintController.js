@@ -30,12 +30,16 @@ exports.updateComplaint = async (req, res) => {
     );
 
     if (!complaint) {
-      return res.status(404).json({ message: "Complaint not found" });
+      return res.status(404).json({
+        message: "Complaint not found",
+      });
     }
 
     res.json(complaint);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
