@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const complaintSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
     name: {
       type: String,
       required: true,
@@ -14,19 +20,31 @@ const complaintSchema = new mongoose.Schema(
       trim: true,
     },
 
+    mobile: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     subject: {
       type: String,
       required: true,
       trim: true,
     },
 
-    complaint: {
+    location: {
       type: String,
       required: true,
       trim: true,
     },
 
-    location: {
+    complaint: {
       type: String,
       required: true,
       trim: true,

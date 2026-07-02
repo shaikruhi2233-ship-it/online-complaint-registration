@@ -1,22 +1,56 @@
 const Complaint = require("../models/Complaint");
 
 // Create Complaint
+// Create Complaint
 exports.createComplaint = async (req, res) => {
   try {
-    const complaint = await Complaint.create(req.body);
+    const complaint = await Complaint.create({
+      userId: req.user.id,
+      name: req.body.name,
+      email: req.body.email,
+      mobile: req.body.mobile,
+        category: req.body.category,
+      subject: req.body.subject,
+      location: req.body.location,
+      complaint: req.body.complaint,
+      status: "Pending",
+    });
+
     res.status(201).json(complaint);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
-// Get All Complaints
+// Get Complaints
+   // Get Complaints
 exports.getComplaints = async (req, res) => {
   try {
-    const complaints = await Complaint.find().sort({ createdAt: -1 });
+    console.log("Logged In User:", req.user);
+
+    let complaints;
+
+    if (req.user.role === "admin") {
+      complaints = await Complaint.find().sort({
+        createdAt: -1,
+      });
+    } else {
+      complaints = await Complaint.find({
+        userId: req.user.id,
+      }).sort({
+        createdAt: -1,
+      });
+    }
+
+    console.log("Complaints Returned:", complaints.length);
+
     res.json(complaints);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
