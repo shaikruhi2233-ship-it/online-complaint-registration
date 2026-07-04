@@ -2,11 +2,14 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// ==========================
 // Register User
+// ==========================
 exports.registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // Check existing user
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -16,16 +19,15 @@ exports.registerUser = async (req, res) => {
       });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Fixed Admin
-   const role = "user";
-
+    // Create new user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role,
+      role: "user",
     });
 
     res.status(201).json({
@@ -35,6 +37,8 @@ exports.registerUser = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Register Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -42,12 +46,22 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+// ==========================
 // Login User
+// ==========================
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    console.log("========== LOGIN ==========");
+    console.log("Email entered:", email);
+
+    // Find user
+    const user = await User.findOne({
+      email: email.trim().toLowerCase(),
+    });
+
+    console.log("User found:", user);
 
     if (!user) {
       return res.status(400).json({
@@ -56,10 +70,10 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    console.log("Password Match:", isMatch);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -68,6 +82,7 @@ exports.loginUser = async (req, res) => {
       });
     }
 
+    // Generate JWT Token
     const token = jwt.sign(
       {
         id: user._id,
@@ -75,7 +90,7 @@ exports.loginUser = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1d",
+        expiresIn: "7d",
       }
     );
 
@@ -83,30 +98,42 @@ exports.loginUser = async (req, res) => {
       success: true,
       message: "Login Successful",
       token,
-      user,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
 
   } catch (error) {
+    console.error("Login Error:", error);
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Server Error",
     });
   }
 };
+// ==========================
 // Get Total Users
+// ==========================
 exports.getTotalUsers = async (req, res) => {
   try {
-    const User = require("../models/User");
-
     const totalUsers = await User.countDocuments({
       role: "user",
     });
 
-    res.json({
+    res.status(200).json({
+      success: true,
       totalUsers,
     });
+
   } catch (error) {
+    console.error("Total Users Error:", error);
+
     res.status(500).json({
+      success: false,
       message: error.message,
     });
   }

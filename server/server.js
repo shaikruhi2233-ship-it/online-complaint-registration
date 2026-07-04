@@ -2,14 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
-const connectDB = require("./config/db");
-
-const complaintRoutes = require("./routes/complaintRoutes");
-const authRoutes = require("./routes/authRoutes");
-
 dotenv.config();
 
-// Create Express App
+const connectDB = require("./config/db");
+
+const authRoutes = require("./routes/authRoutes");
+const complaintRoutes = require("./routes/complaintRoutes");
+
 const app = express();
 
 // Connect Database
@@ -20,8 +19,10 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use("/api/complaints", complaintRoutes);
 app.use("/api/auth", authRoutes);
+console.log("✅ authRoutes loaded");
+
+app.use("/api/complaints", complaintRoutes);
 
 // Home Route
 app.get("/", (req, res) => {
