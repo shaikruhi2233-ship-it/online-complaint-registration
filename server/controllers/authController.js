@@ -9,8 +9,10 @@ exports.registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check existing user
-    const existingUser = await User.findOne({ email });
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      email: email.trim().toLowerCase(),
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -19,13 +21,13 @@ exports.registerUser = async (req, res) => {
       });
     }
 
-    // Hash password
+    // Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create User
     const user = await User.create({
       name,
-      email,
+      email: email.trim().toLowerCase(),
       password: hashedPassword,
       role: "user",
     });
@@ -33,7 +35,12 @@ exports.registerUser = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Registration Successful",
-      user,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
 
   } catch (error) {
@@ -56,7 +63,6 @@ exports.loginUser = async (req, res) => {
     console.log("========== LOGIN ==========");
     console.log("Email entered:", email);
 
-    // Find user
     const user = await User.findOne({
       email: email.trim().toLowerCase(),
     });
@@ -70,8 +76,10 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     console.log("Password Match:", isMatch);
 
@@ -82,7 +90,7 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    // Generate JWT Token
+    // Generate Token
     const token = jwt.sign(
       {
         id: user._id,
@@ -115,6 +123,7 @@ exports.loginUser = async (req, res) => {
     });
   }
 };
+
 // ==========================
 // Get Total Users
 // ==========================
