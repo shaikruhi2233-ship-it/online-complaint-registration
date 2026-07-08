@@ -2,37 +2,43 @@ const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    // Get Authorization header
+    const authHeader = req.header("Authorization");
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader) {
       return res.status(401).json({
         success: false,
-        message: "No Token Provided",
+        message: "Access Denied. No Token Provided.",
       });
     }
 
+    // Check Bearer format
+    if (!authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Token Format.",
+      });
+    }
+
+    // Extract token
     const token = authHeader.split(" ")[1];
 
-    console.log("Received Token:", token);
-    console.log("JWT Secret:", process.env.JWT_SECRET);
+    // Verify token
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Received Token:", token);
-console.log("JWT Secret:", process.env.JWT_SECRET);
-
-    console.log("Decoded:", decoded);
-
-    req.user = decoded;
+    // Save user info in request
+    req.user = verified;
 
     next();
   } catch (err) {
-  console.error("JWT ERROR:", err);
+    console.error("JWT ERROR:", err);
 
-  return res.status(401).json({
-    success: false,
-    message: "Invalid Token",
-    error: err.message,
-  });
-}
+    return res.status(401).json({
+      success: false,
+      message: "Invalid Token",
+      error: err.message,
+    });
+  }
+};
 
 module.exports = authMiddleware;
