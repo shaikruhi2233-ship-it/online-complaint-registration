@@ -1,33 +1,46 @@
-const express = require("express");
-const router = express.Router();
+const jwt = require("jsonwebtoken");
 
-const {
-  createComplaint,
-  getComplaints,
-  updateComplaint,
-  deleteComplaint,
-} = require("../controllers/complaintController");
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.header("Authorization");
 
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
+  console.log("====================================");
+  console.log("Authorization Header:", authHeader);
 
-// User
-router.post("/", authMiddleware, createComplaint);
-router.get("/", authMiddleware, getComplaints);
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "No Token Provided",
+    });
+  }
 
-// Admin Only
-router.put(
-  "/:id",
-  authMiddleware,
-  adminMiddleware,
-  updateComplaint
-);
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.substring(7)
+    : authHeader;
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  adminMiddleware,
-  deleteComplaint
-);
+  console.log("Token:", token);
+  console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
-module.exports = router;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log("TOKEN VERIFIED");
+    console.log(decoded);
+
+    req.user = decoded;
+    next();
+
+  } catch (err) {
+
+    console.log("=========== JWT ERROR ===========");
+    console.log("Error Name:", err.name);
+    console.log("Error Message:", err.message);
+    console.log("Token Length:", token.length);
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
+    return res.status(401).json({
+      message: "Invalid Token",
+      error: err.message,
+    });
+  }
+};
+
+module.exports = authMiddleware;
