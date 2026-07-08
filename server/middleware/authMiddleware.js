@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
+console.log("TOKEN:", token);
 
 const authMiddleware = (req, res, next) => {
   console.log("\n========== AUTH MIDDLEWARE ==========");
@@ -20,7 +22,7 @@ const authMiddleware = (req, res, next) => {
     : authHeader;
 
   console.log("Token:", token);
-  console.log("JWT_SECRET:", process.env.JWT_SECRET);
+  console.log("JWT_SECRET Exists:", !!process.env.JWT_SECRET);
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -33,8 +35,8 @@ const authMiddleware = (req, res, next) => {
     next();
   } catch (err) {
     console.log("JWT VERIFY FAILED");
-    console.log(err.name);
-    console.log(err.message);
+    console.log("Error Name:", err.name);
+    console.log("Error Message:", err.message);
 
     return res.status(401).json({
       message: "Invalid Token",
