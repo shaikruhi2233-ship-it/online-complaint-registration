@@ -17,6 +17,8 @@ const authMiddleware = (req, res, next) => {
     console.log("JWT Secret:", process.env.JWT_SECRET);
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Received Token:", token);
+console.log("JWT Secret:", process.env.JWT_SECRET);
 
     console.log("Decoded:", decoded);
 
