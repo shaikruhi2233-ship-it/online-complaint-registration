@@ -25,6 +25,7 @@ const authMiddleware = (req, res, next) => {
   console.log("JWT_SECRET Exists:", !!process.env.JWT_SECRET);
 
   try {
+    console.log("VERIFY JWT_SECRET:", process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     console.log("TOKEN VERIFIED");
