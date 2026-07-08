@@ -24,14 +24,13 @@ const authMiddleware = (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error("JWT ERROR:", err);
+  console.error("JWT ERROR:", err);
 
-    return res.status(401).json({
-      success: false,
-      message: "Invalid Token",
-      error: err.message,
-    });
-  }
-};
+  return res.status(401).json({
+    success: false,
+    message: "Invalid Token",
+    error: err.message,
+  });
+}
 
 module.exports = authMiddleware;
